@@ -1,0 +1,16 @@
+\section{Solidity to Control-Flow Graph}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Control-Flow Graph of a Solidity Function}
+
+To generate the control-flow graph of a Solidity function we initially create an entry node and an exit node. Every node represents a basic block of the original program. Starting at the entry node we scan the code until a control structure is reached. At this point the statements collected are stored in the basic block and transitions to new nodes are created according to the control structure reached. At the end, when the last line of code of a path is scanned, a transition is added to the exit node.
+
+The shape of the resulting graph depends of the control structures in the code. The graphs generate by some common control structures are shown in Figure \ref{}; each transition is associated with a predicate derived from a control structure. When a function has zero or one return statement, there is only one transition targeting the exit node, when multiple returns are present we have more than one of such transitions, as can be seen in Figure \ref{}. 
+
+Solidity has built-in assertion operators. The \textit{require} operator works as a pre-condition, and in our encoding of Solidity does not influence the shape of the graph, being added as a condition inside the basic blocks. The \textit{assert} operator works as a post-condition, and is encoded as a conditional
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Control-Flow Graph of a Solidity Contract}
+

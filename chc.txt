@@ -1,0 +1,102 @@
+(set-logic HORN)
+
+(declare-rel Constructor (Int Int))
+(declare-rel Interface (Int Int))
+(declare-rel FB0 (Int Int Int))
+(declare-rel FBSink (Int Int))
+(declare-rel Avg0 (Int Int))
+(declare-rel AvgBranch (Int Int Int))
+(declare-rel AvgError ())
+(declare-rel AvgSink (Int Int))
+
+(declare-var v Int)
+(declare-var sum Int)
+(declare-var sum_ Int)
+(declare-var count Int)
+(declare-var count_ Int)
+(declare-var avg Int)
+
+(rule
+	(=>
+		(and
+			(FB0 v sum count)
+			(> v 0)
+			(= sum_ (+ sum v))
+			(= count_ (+ count 1))
+		)
+		(FBSink sum_ count_)
+	)
+)
+
+(rule
+	(=>
+		(and
+			(Avg0 sum count)
+			(> count 0)
+			(= avg (/ sum count))
+		)
+		(AvgBranch avg sum count)
+	)
+)
+
+(rule
+	(=>
+		(and
+			(AvgBranch avg sum count)
+			(<= avg 0)
+		)
+		AvgError
+	)
+)
+
+(rule
+	(=>
+		(and
+			(AvgBranch avg sum count)
+			(> avg 0)
+		)
+		(AvgSink sum count)
+	)
+)
+
+(rule
+	(Constructor 0 0)
+)
+
+(rule
+	(=>
+		(Constructor sum count)
+		(Interface sum count)
+	)
+)
+
+(rule
+	(=>
+		(FBSink sum count)
+		(Interface sum count)
+	)
+)
+
+(rule
+	(=>
+		(AvgSink sum count)
+		(Interface sum count)
+	)
+)
+
+(rule
+	(=>
+		(Interface sum count)
+		(FB0 v sum count)
+	)
+)
+
+(rule
+	(=>
+		(Interface sum count)
+		(Avg0 sum count)
+	)
+)
+
+(query AvgError)
+(get-model)
