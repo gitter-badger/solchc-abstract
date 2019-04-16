@@ -12,7 +12,10 @@ Solidity is a Turing-Complete language for the development of smart contracts. T
 
 \paragraph{} As a running example, consider contract \texttt{C} shown in Listing \ref{contractC}. This contract has two state variables of type unsigned int, \texttt{sum} and \texttt{count}, and two functions. The first function is a fallback function, it has no name and is executed when the contract is called without specifying one of its named functions; \texttt{external} specify that the function can only be called from outside the contract, while \texttt{payable} allows the function to receive ether. The \texttt{average} function follows the standard format, returning an unsigned integer at the end of its execution; \texttt{public} specify that the function can be called both from inside and outside the contract, and \texttt{view} ensures that the state variables are not modified.
 
-\lstinputlisting[caption=Running Example,label=contractC,frame=single,numbers=left,basicstyle=\ttfamily,float=ht]{contract.txt}
+\begin{figure}
+\lstinputlisting{contract.txt}
+\caption{An example of a contract written in Solidity}
+\end{figure}
 
 to do (require + assert)
 
