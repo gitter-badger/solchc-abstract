@@ -4,23 +4,30 @@
 
 \subsection{Solidity}
 
+Solidity is a Turing-Complete language for the development of smart contracts. The two main elements of Solidity are contracts and functions, which we now describe; detailed information on Solidity can be found in \cite{}. 
 
+\paragraph{Contracts.} A Solidity contract is a structure similar to a class in object-oriented languages, and can contain both data and functions. Data can range from integer and boolean values to arrays and structs. Functions contain the instructions for computation. A contract does not have a main function, instead all functions with appropriate visibility can be called once the contract is deployed on the blockchain.
 
-\lstinputlisting[caption=Running Example,frame=single]{contract.txt}
+\paragraph{Functions.} A function in a contract contains a sequence of statements for computation. Most operators that are common in programming languages, such as conditionals and loops, are supported. Function qualifiers include visibility and access to state variables. 
 
-\paragraph{Contracts.} to do
+\paragraph{} As a running example, consider contract \texttt{C} shown in Listing \ref{contractC}. This contract has two state variables of type unsigned int, \texttt{sum} and \texttt{count}, and two functions. The first function is a fallback function, it has no name and is executed when the contract is called without specifying one of its named functions; \texttt{external} specify that the function can only be called from outside the contract, while \texttt{payable} allows the function to receive ether. The \texttt{average} function follows the standard format, returning an unsigned integer at the end of its execution; \texttt{public} specify that the function can be called both from inside and outside the contract, and \texttt{view} ensures that the state variables are not modified.
 
-\paragraph{Functions.} to do
+\lstinputlisting[caption=Running Example,label=contractC,frame=single,numbers=left,basicstyle=\ttfamily,float=ht]{contract.txt}
+
+to do (require + assert)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Control-Flow Graph}
 
-\paragraph{Basic Blocks.} to do
+A control-flow graph is way to model a program such that all execution paths are explicitly present and can be analysed. There are two elements that constitute a control-flow graph: basic blocks and transitions.
 
-\paragraph{Transitions.} to do
+\paragraph{Basic Blocks.} These are the nodes of the graph. They represent a number of sequential statements that do not influence the execution flow of the program, such as assignments. The statements represented by the node have their order maintained and can be retrieved during analysis.
+
+\paragraph{Transitions.} These are the edges of the graph. They represent control flow structures such as conditionals and while-loops. Associated with each transition is a predicate that must be evaluated to "true" for the transition to taken. Transitions never occur in isolation, since basic blocks with in-degree and out-degree of one can be merged with an adjacent block. To avoid nondeterminism and ensure that one transition can always be taken from a particular node, the disjunction of the predicates of all transitions starting in it need to be "true", and their conjunction needs to "false".
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Horn Clauses}
 
+to do
