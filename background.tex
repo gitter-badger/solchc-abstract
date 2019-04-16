@@ -10,14 +10,17 @@ Solidity is a Turing-Complete language for the development of smart contracts. T
 
 \paragraph{Functions.} A function in a contract contains a sequence of statements for computation. Most operators that are common in programming languages, such as conditionals and loops, are supported. Function qualifiers include visibility and access to state variables. 
 
-\paragraph{} As a running example, consider contract \texttt{C} shown in Listing \ref{contractC}. This contract has two state variables of type unsigned int, \texttt{sum} and \texttt{count}, and two functions. The first function is a fallback function, it has no name and is executed when the contract is called without specifying one of its named functions; \texttt{external} specify that the function can only be called from outside the contract, while \texttt{payable} allows the function to receive ether. The \texttt{average} function follows the standard format, returning an unsigned integer at the end of its execution; \texttt{public} specify that the function can be called both from inside and outside the contract, and \texttt{view} ensures that the state variables are not modified.
+\paragraph{} As a running example, consider contract \texttt{C} shown in Figure \ref{fig:contractC}. This contract has two state variables of type unsigned int, \texttt{sum} and \texttt{count}, and two functions. The first function is a fallback function, it has no name and is executed when the contract is called without specifying one of its named functions; \texttt{external} specify that the function can only be called from outside the contract, while \texttt{payable} allows the function to receive ether. The \texttt{average} function follows the standard format, returning an unsigned integer at the end of its execution; \texttt{public} specify that the function can be called both from inside and outside the contract, and \texttt{view} ensures that the state variables are not modified.
 
 \begin{figure}
 \lstinputlisting{contract.txt}
 \caption{An example of a contract written in Solidity}
+\label{fig:contractC}
 \end{figure}
 
-to do (require + assert)
+The fallback function accepts a certain value in ether, \texttt{msg.value}, adds this value to \texttt{sum}, and increase the counter. Two \texttt{require} assertions are present, the first one checks if the sent value is positive, an the second one ensures that overflow will not occur. This type of assertion works as a pre-condition, usually used to check inputs.
+
+The \texttt{average} function calculates and returns the average of deposits of ether. Two assertions are present, the first one checks if there is at least one deposit, and the second one ensure that the average positive. The \texttt{assert} works as a post-condition, meaning that its predicate should never be false in a valid execution, with a violation capturing an error in the code.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
