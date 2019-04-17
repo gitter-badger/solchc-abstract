@@ -39,6 +39,18 @@ A control-flow graph is way to model a program such that all execution paths are
 
 \subsection{Constrained Horn Clauses} \label{sec:chc}
 
-Horn Clauses are disjunctions of literals with at most one positive literal. They can be written in implication form and be used for program verification.
+Constrained Horn clauses are disjunctions of literals with at most one positive literal. They can be written in implication form and be used for program verification. When describing a piece of code, rules are created with the following structure:
 
-to do (definition + example)
+\begin{align*}
+SSA \land Condition \land Current\_Relation \implies Next\_Relation
+\end{align*}
+
+The \texttt{SSA} captures the Single Static Assignment of the variables in code being modelled, and it is written as a conjunction of equalities. The \texttt{Condition} states the condition of a control-flow structure, such as a conditional. The \texttt{Current\_Relation} and \texttt{Next\_Relation} represent points in the code, in way that by applying the rules it is possible to simulate an execution. The only mandatory field is \texttt{Next\_Relation}, with the most simplified rule being the one with just the start relation.
+
+Horn clauses can be linear, also called constrained, or non-linear, the former has only rules with a one to one link between relations, while the former allows for many to one links, with many relations on the left hand side of the implication. In this work we consider only constrained Horn clauses.
+
+%\begin{figure}
+%\lstinputlisting{chc.txt}
+%\caption{to do}
+%\label{fig:chcC}
+%\end{figure}
