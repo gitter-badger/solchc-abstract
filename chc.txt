@@ -98,5 +98,4 @@
 	)
 )
 
-(query AvgError)
-(get-model)
+(query AvgError :print-certificate true)
