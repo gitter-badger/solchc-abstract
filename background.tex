@@ -1,11 +1,10 @@
 \section{Background}
 
-Here we present the background material of our work: the Solidity language, in Section \ref{sec:sol}, control-flow graphs, in Section \ref{sec:cfg}, and constrained Horn clauses, in Section \ref{sec:chc}.
-
+Here we present the background material of our work: the Solidity language, in Section \ref{sec:background_sol}, control-flow graphs, in Section \ref{sec:background_cfg}, and constrained Horn clauses, in Section \ref{sec:background_chc}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Solidity} \label{sec:sol}
+\subsection{Solidity} \label{sec:background_sol}
 
 Solidity is a Turing-Complete language for the development of smart contracts. The two main elements of Solidity are contracts and functions, which we now describe; detailed information on Solidity can be found in \cite{}. 
 
@@ -27,7 +26,7 @@ The \texttt{average} function calculates and returns the average of deposits of 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Control-Flow Graph} \label{sec:cfg}
+\subsection{Control-Flow Graph} \label{sec:background_cfg}
 
 A control-flow graph is way to model a program such that all execution paths are explicitly present and can be analysed. There are two elements that constitute a control-flow graph: basic blocks and transitions.
 
@@ -37,7 +36,7 @@ A control-flow graph is way to model a program such that all execution paths are
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{Constrained Horn Clauses} \label{sec:chc}
+\subsection{Constrained Horn Clauses} \label{sec:background_chc}
 
 Constrained Horn clauses are disjunctions of literals with at most one positive literal. They can be written in implication form and be used for program verification. When describing a piece of code, rules are created with the following structure:
 
