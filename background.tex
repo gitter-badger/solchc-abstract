@@ -28,28 +28,10 @@ The \texttt{average} function calculates and returns the average of deposits of 
 
 \subsection{Control-Flow Graph} \label{sec:background_cfg}
 
-A control-flow graph is way to model a program such that all execution paths are explicitly present and can be analysed. There are two elements that constitute a control-flow graph: basic blocks and transitions.
-
-\paragraph{Basic Blocks.} These are the nodes of the graph. They represent a number of sequential statements that do not influence the execution flow of the program, such as assignments. The statements represented by the node have their order maintained and can be retrieved during analysis.
-
-\paragraph{Transitions.} These are the edges of the graph. They represent control flow structures such as conditionals and while-loops. Associated with each transition is a predicate that must be evaluated to "true" for the transition to taken. Transitions never occur in isolation, since basic blocks with in-degree and out-degree of one can be merged with an adjacent block. To avoid nondeterminism and ensure that one transition can always be taken from a particular node, the disjunction of the predicates of all transitions starting in it need to be "true", and their conjunction needs to "false".
+to do
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Constrained Horn Clauses} \label{sec:background_chc}
 
-Constrained Horn clauses are disjunctions of literals with at most one positive literal. They can be written in implication form and be used for program verification. When describing a piece of code, rules are created with the following structure:
-
-\begin{align*}
-SSA \land Condition \land Current\_Relation \implies Next\_Relation
-\end{align*}
-
-The \texttt{SSA} captures the Single Static Assignment of the variables in code being modelled, and it is written as a conjunction of equalities. The \texttt{Condition} states the condition of a control-flow structure, such as a conditional. The \texttt{Current\_Relation} and \texttt{Next\_Relation} represent points in the code, in way that by applying the rules it is possible to simulate an execution. The only mandatory field is \texttt{Next\_Relation}, with the most simplified rule being the one with just the start relation.
-
-Horn clauses can be linear, also called constrained, or non-linear, the former has only rules with a one to one link between relations, while the former allows for many to one links, with many relations on the left hand side of the implication. In this work we consider only constrained Horn clauses.
-
-%\begin{figure}
-%\lstinputlisting{chc.txt}
-%\caption{to do}
-%\label{fig:chcC}
-%\end{figure}
+to do
