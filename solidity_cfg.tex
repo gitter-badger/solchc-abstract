@@ -43,6 +43,8 @@ The encoding of the Solidity assertions is done according to their semantics. Th
   \end{minipage}
 \end{figure}
 
+Function calls, be them  recursive calls, calls to functions in the same contract or in another contract, are always considered to be inlined. The source code of all functions called is thus required for the generation of the control-flow graph.
+
 The control-flow graph of \texttt{average} function shown in Section \ref{sec:background_sol} can be seen in Figure \ref{fig:cfg_average}. In this example we can see that the variables \texttt{count} and \texttt{sum} are used but not defined, since they are state variables; the return variable is initialized with its default value. To correctly encode state variables, a model of the whole contract is required.
 
 \begin{figure}[ht]
@@ -56,8 +58,22 @@ The control-flow graph of \texttt{average} function shown in Section \ref{sec:ba
 
 \subsection{Control-Flow Graph of a Solidity Contract} \label{sec:sol_cfg_con}
 
-Unlike programming languages such as C++ and Java, Solidity does not have a main function, the functions of a given contract can be called independently and in any order. To capture the behaviour of a whole contract in a single control-flow graph, we create an infrastructure to model calls to functions, as can be seen in Figure \ref{}.
+Solidity contracts do not have a main function, once deployed to the blockchain all their functions, with the appropriate visibility, can be called many times and in any order. To capture this behaviour in a single control-flow graph, we create an infrastructure to model calls to functions, as can be seen in Figure \ref{fig:cfg_contract-general}.
 
-The entry node of the graph models the constructor of the contract, which is a special function that is executed before deploying the contract on the blockchain, with the goal of initializing state variables. From the constructor only one transition is possible, to the interface node, which is an internal node that targets the entry node of each function in the contract. To represent the fact that the contract functions can be called in any order, the transitions starting at the interface are nondeterministic, with their predicates being simply "true". To allow for many function calls, the exit node of each function targets the interface node.
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.7\textwidth]{images/contract-general}
+	\caption{Graph of a Solidity contract}
+	\label{fig:cfg_contract-general}
+\end{figure}
 
-The final point to consider is the use of assertions. The \texttt{require} operator is handled as previously described, since it does not influence the control-flow. The \texttt{assert} operator, however, now targets a global error state, instead of a specific one for each function. This change makes checking the contract easier, since we only need verify if one particular state can be reached. 
+The entry node of the graph is the constructor of the contract, which is a special function that is executed before deploying the contract on the blockchain, with the goal of initializing state variables. After the constructor we have the interface node, which is an empty node that targets the entry of each function in the contract. To represent the nondeterminism in the order in which the functions are called, all transitions starting at the interface have value \texttt{true}. Multiple function calls are enabled through the edges between the exits nodes of each function and the interface. To simplify the analysis, the contract model has a single error state instead of one for each function. 
+
+The graph that models the contract \texttt{C}, shown in Section \ref{sec:background_sol}, can be seen in Figure \ref{fig:cfg_contract-c}. Due to absence of \texttt{assert} statements in the constructor and the fallback function, there is only one edge targeting the error node, starting from the \texttt{average} function. Every function that is \texttt{payable}, such as the fallback function in our example, has a \texttt{msg} object implicitly defined, with \texttt{msg.value} being the amount of ether sent to the function. Since the state of \texttt{msg} depends on the arguments of the call, \texttt{msg.value} is initialized with a nondeterministic value, symbolised by \texttt{\#}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9\textwidth]{images/contract-c}
+	\caption{Graph of a Solidity contract}
+	\label{fig:cfg_contract-c}
+\end{figure}
