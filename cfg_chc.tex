@@ -1,1 +1,138 @@
-\section{cfg to chc}
+\section{Control-Flow Graph to Constrained Horn Clauses}
+
+\begin{flalign*}
+& (\text{set-logic HORN}) &
+\end{flalign*}
+
+\begin{flalign*}
+& (\text{declare-rel Constructor (Int Int)}) & \\
+& (\text{declare-rel Interface (Int Int)}) \\
+& (\text{declare-rel FB0 (Int Int Int)}) \\
+& (\text{declare-rel FBSink (Int Int)}) \\
+& (\text{declare-rel Avg0 (Int Int)}) \\
+& (\text{declare-rel Avg1 (Int Int Int)}) \\
+& (\text{declare-rel AvgSink (Int Int)}) \\
+& (\text{declare-rel Error ()})
+\end{flalign*}
+
+\begin{flalign*}
+& (\text{declare-var msg.val Int}) & \\
+& (\text{declare-var sum\_0 Int}) \\
+& (\text{declare-var sum\_1 Int}) \\
+& (\text{declare-var count\_0 Int}) \\
+& (\text{declare-var count\_1 Int}) \\
+& (\text{declare-var avg Int})
+\end{flalign*}
+
+\begin{flalign*}
+(\text{rule } & (\implies & \\
+& (\text{and } (\text{FB0 msg.val sum\_0 count\_0}) \ (>\text{msg.val 0}) \ (\leq\text{(+ sum\_0 msg.val) 1000000}) \\
+& \hspace{0.76cm} (\text{= sum\_1 (+ sum\_0 msg.val)}) \ (\text{= count\_1 (+ count\_0 1}))) \\ 
+& (\text{FBSink sum\_1 count\_1})))
+\\
+(\text{rule } & (\implies \\
+& (\text{and } (\text{Avg0 sum\_0 count\_0}) \ (>\text{count\_0 0}) \ (\text{= avg (/ sum\_0 count\_0)})) \\ 
+& (\text{Avg1 avg sum\_0 count\_0})))
+\\
+(\text{rule } & (\implies \\
+& (\text{and } (\text{Avg1 avg sum\_0 count\_0}) \ (\leq\text{avg 0})) \\ 
+& (\text{AvgError})))
+\\
+(\text{rule } & (\implies \\
+& (\text{and } (\text{Avg1 avg sum\_0 count\_0}) \ (>\text{avg 0})) \\ 
+& (\text{AvgSink sum\_0 count\_0})))
+\\
+(\text{rule } & (\text{Constructor 0 0}))
+\\
+(\text{rule } & (\implies \\
+& (\text{Constructor sum\_0 count\_0}) \\ 
+& (\text{Interface sum\_0 count\_0})))
+\\
+(\text{rule } & (\implies \\
+& (\text{FBSink sum\_0 count\_0}) \\ 
+& (\text{Interface sum\_0 count\_0})))
+\\
+(\text{rule } & (\implies \\
+& (\text{AvgSink sum\_0) count\_0}) \\ 
+& (\text{Interface sum\_0 count\_0})))
+\\
+(\text{rule } & (\implies \\
+& (\text{Interface sum\_0 count\_0}) \\ 
+& (\text{FB0 msg.val sum\_0 count\_0})))
+\\
+(\text{rule } & (\implies \\
+& (\text{Interface sum\_0 count\_0}) \\ 
+& (\text{Avg0 sum\_0 count\_0})))
+\end{flalign*}
+
+\begin{flalign*}
+& (\text{query Error :print-certificate true}) &
+\end{flalign*}
+
+%\begin{flalign*}
+%& (\text{set-logic HORN}) &
+%\end{flalign*}
+%
+%\begin{flalign*}
+%& (\text{declare-rel Constructor (Int Int)}) & \\
+%& (\text{declare-rel Interface (Int Int)}) \\
+%& (\text{declare-rel FB0 (Int Int Int)}) \\
+%& (\text{declare-rel FBSink (Int Int)}) \\
+%& (\text{declare-rel Avg0 (Int Int)}) \\
+%& (\text{declare-rel AvgBranch (Int Int Int)}) \\
+%& (\text{declare-rel AvgError ()}) \\
+%& (\text{declare-rel AvgSink (Int Int)})
+%\end{flalign*}
+%
+%\begin{flalign*}
+%& (\text{declare-var v Int}) & \\
+%& (\text{declare-var sum Int}) \\
+%& (\text{declare-var sum\_ Int}) \\
+%& (\text{declare-var count Int}) \\
+%& (\text{declare-var count\_ Int}) \\
+%& (\text{declare-var avg Int})
+%\end{flalign*}
+%
+%\begin{flalign*}
+%(\text{rule } & (\implies & \\
+%& (\text{and } (\text{FB0 v sum count}) \ (>\text{v 0}) \ (\text{= sum\_ (+ sum v)}) \ (\text{= count\_ (+ count 1}))) \\ 
+%& (\text{FBSink sum\_ count\_})))
+%\\
+%(\text{rule } & (\implies \\
+%& (\text{and } (\text{Avg0 sum count}) \ (>\text{count 0}) \ (\text{= avg (/ sum count)})) \\ 
+%& (\text{AvgBranch avg sum count})))
+%\\
+%(\text{rule } & (\implies \\
+%& (\text{and } (\text{AvgBranch avg sum count}) \ (\leq\text{avg 0})) \\ 
+%& (\text{AvgError})))
+%\\
+%(\text{rule } & (\implies \\
+%& (\text{and } (\text{AvgBranch avg sum count}) \ (>\text{avg 0})) \\ 
+%& (\text{AvgSink sum count})))
+%\\
+%(\text{rule } & (\text{Constructor 0 0}))
+%\\
+%(\text{rule } & (\implies \\
+%& (\text{Constructor sum count}) \\ 
+%& (\text{Interface sum count})))
+%\\
+%(\text{rule } & (\implies \\
+%& (\text{FBSink sum count}) \\ 
+%& (\text{Interface sum count})))
+%\\
+%(\text{rule } & (\implies \\
+%& (\text{AvgSink sum count}) \\ 
+%& (\text{Interface sum count})))
+%\\
+%(\text{rule } & (\implies \\
+%& (\text{Interface sum count}) \\ 
+%& (\text{FB0 v sum count})))
+%\\
+%(\text{rule } & (\implies \\
+%& (\text{Interface sum count}) \\ 
+%& (\text{Avg0 sum count})))
+%\end{flalign*}
+%
+%\begin{flalign*}
+%& (\text{query AvgError :print-certificate true}) &
+%\end{flalign*}
