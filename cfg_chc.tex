@@ -1,69 +1,83 @@
-\section{Control-Flow Graph to Constrained Horn Clauses}
+\section{Control-Flow Graph to Horn Clauses}
 
-\begin{flalign*}
-& (\text{set-logic HORN}) &
-\end{flalign*}
+From control-flow graphs we can generate Horn clauses that enable the use of powerful of-the-shelf smt solvers for verification. For each transition in the graph, we create a constrained Horn Clause with the following structure:
 
-\begin{flalign*}
-& (\text{declare-rel Constructor (Int Int)}) & \\
-& (\text{declare-rel Interface (Int Int)}) \\
-& (\text{declare-rel FB0 (Int Int Int)}) \\
-& (\text{declare-rel FBSink (Int Int)}) \\
-& (\text{declare-rel Avg0 (Int Int)}) \\
-& (\text{declare-rel Avg1 (Int Int Int)}) \\
-& (\text{declare-rel AvgSink (Int Int)}) \\
-& (\text{declare-rel Error ()})
-\end{flalign*}
+\begin{align*}
+\text{Current\_Relation} \land \text{SSA} \land \text{Condition} \implies \text{Next\_Relation}
+\end{align*}
 
-\begin{flalign*}
-& (\text{declare-var msg.val Int}) & \\
-& (\text{declare-var sum\_0 Int}) \\
-& (\text{declare-var sum\_1 Int}) \\
-& (\text{declare-var count\_0 Int}) \\
-& (\text{declare-var count\_1 Int}) \\
-& (\text{declare-var avg Int})
-\end{flalign*}
+The Current\_Relation represents the source node of the transition, the SSA models the statements stored in the source node in Single Static Assignment format, the Condition is the predicate associated with the transition, and, finally, the Next\_Relation represents the target node of the transition. All the terms in the left-hand side are optional, with their absence being marked by \texttt{true}. A clause without its Current\_Relation models the constructor, while a missing SSA term indicates an empty node; conditions with value \texttt{true} are omitted for brevity.
 
-\begin{flalign*}
-(\text{rule } & (\implies & \\
-& (\text{and } (\text{FB0 msg.val sum\_0 count\_0}) \ (>\text{msg.val 0}) \ (\leq\text{(+ sum\_0 msg.val) 1000000}) \\
-& \hspace{0.76cm} (\text{= sum\_1 (+ sum\_0 msg.val)}) \ (\text{= count\_1 (+ count\_0 1}))) \\ 
-& (\text{FBSink sum\_1 count\_1})))
-\\
-(\text{rule } & (\implies \\
-& (\text{and } (\text{Avg0 sum\_0 count\_0}) \ (>\text{count\_0 0}) \ (\text{= avg (/ sum\_0 count\_0)})) \\ 
-& (\text{Avg1 avg sum\_0 count\_0})))
-\\
-(\text{rule } & (\implies \\
-& (\text{and } (\text{Avg1 avg sum\_0 count\_0}) \ (\leq\text{avg 0})) \\ 
-& (\text{AvgError})))
-\\
-(\text{rule } & (\implies \\
-& (\text{and } (\text{Avg1 avg sum\_0 count\_0}) \ (>\text{avg 0})) \\ 
-& (\text{AvgSink sum\_0 count\_0})))
-\\
-(\text{rule } & (\text{Constructor 0 0}))
-\\
-(\text{rule } & (\implies \\
-& (\text{Constructor sum\_0 count\_0}) \\ 
-& (\text{Interface sum\_0 count\_0})))
-\\
-(\text{rule } & (\implies \\
-& (\text{FBSink sum\_0 count\_0}) \\ 
-& (\text{Interface sum\_0 count\_0})))
-\\
-(\text{rule } & (\implies \\
-& (\text{AvgSink sum\_0) count\_0}) \\ 
-& (\text{Interface sum\_0 count\_0})))
-\\
-(\text{rule } & (\implies \\
-& (\text{Interface sum\_0 count\_0}) \\ 
-& (\text{FB0 msg.val sum\_0 count\_0})))
-\\
-(\text{rule } & (\implies \\
-& (\text{Interface sum\_0 count\_0}) \\ 
-& (\text{Avg0 sum\_0 count\_0})))
-\end{flalign*}
+Our model allows only for constrained, also called linear, Horn clauses, with rules containing only a one to one link between relations. Non-linearity, with many to one links, can arise from recursive calls, but these are removed during the generation of the control-flow graph through inlining.
+
+We now present the result of translating the graph in Figure \ref{fig:cfg_contract-c} into Horn clauses. First, all the relations and variables need to be declared, as shown in Figure \ref{fig:chc_rel-and-var}. Each relation has a set of parameters, which are the variables used in their context; state variables are present in all relations, while local variables only the relations modelling their function. Two versions of the \texttt{sum} and \texttt{count} variables are defined, due to SSA.
+
+\begin{figure}[ht]
+	\centering
+	\begin{align*}
+    & (\text{declare-rel Constructor (Int Int)}) && (\text{declare-var msg.val Int}) & \\
+    & (\text{declare-rel Interface (Int Int)}) && (\text{declare-var sum\_0 Int}) \\
+    & (\text{declare-rel FB0 (Int Int Int)}) && (\text{declare-var sum\_1 Int}) \\
+    & (\text{declare-rel FBSink (Int Int)}) && (\text{declare-var count\_0 Int}) \\
+    & (\text{declare-rel Avg0 (Int Int)}) && (\text{declare-var count\_1 Int}) \\
+    & (\text{declare-rel Avg1 (Int Int Int)}) && (\text{declare-var avg Int}) \\
+    & (\text{declare-rel AvgSink (Int Int)}) && \\
+    & (\text{declare-rel Error ()}) &&
+	\end{align*}
+	\caption{Declaration of relations and variables for the encoding of contract \texttt{C}}
+	\label{fig:chc_rel-and-var}
+\end{figure}
+
+
+
+\begin{figure}[ht]
+	\centering
+	\begin{align*}
+	(\text{rule } & (\text{Constructor 0 0}))
+    \\
+    (\text{rule } & (\implies \\
+    & (\text{Constructor sum\_0 count\_0}) \\ 
+    & (\text{Interface sum\_0 count\_0})))
+    \\
+    (\text{rule } & (\implies \\
+    & (\text{Interface sum\_0 count\_0}) \\ 
+    & (\text{FB0 msg.val sum\_0 count\_0})))
+    \\
+    (\text{rule } & (\implies \\
+    & (\text{Interface sum\_0 count\_0}) \\ 
+    & (\text{Avg0 sum\_0 count\_0})))
+    \\
+	(\text{rule } & (\implies \\
+    & (\text{and } (\text{FB0 msg.val sum\_0 count\_0}) \\
+    & \hspace{0.76cm} (>\text{msg.val 0}) \ (\leq\text{(+ sum\_0 msg.val) 1000000}) \\
+    & \hspace{0.76cm} (\text{= sum\_1 (+ sum\_0 msg.val)}) \ (\text{= count\_1 (+ count\_0 1}))) \\ 
+    & (\text{FBSink sum\_1 count\_1})))
+    \\
+    (\text{rule } & (\implies \\
+    & (\text{FBSink sum\_0 count\_0}) \\ 
+    & (\text{Interface sum\_0 count\_0})))
+    \\
+    (\text{rule } & (\implies \\
+    & (\text{and } (\text{Avg0 sum\_0 count\_0}) \ (>\text{count\_0 0}) \ (\text{= avg (/ sum\_0 count\_0)})) \\ 
+    & (\text{Avg1 avg sum\_0 count\_0})))
+    \\
+    (\text{rule } & (\implies \\
+    & (\text{and } (\text{Avg1 avg sum\_0 count\_0}) \ (\leq\text{avg 0})) \\ 
+    & (\text{Error})))
+    \\
+    (\text{rule } & (\implies \\
+    & (\text{and } (\text{Avg1 avg sum\_0 count\_0}) \ (>\text{avg 0})) \\ 
+    & (\text{AvgSink sum\_0 count\_0})))
+    \\
+    (\text{rule } & (\implies \\
+    & (\text{AvgSink sum\_0 count\_0}) \\ 
+    & (\text{Interface sum\_0 count\_0})))
+    \end{align*}
+	\caption{Rules for the encoding of contract \texttt{C}}
+	\label{fig:chc_rules}
+\end{figure}
+
+
 
 \begin{flalign*}
 & (\text{query Error :print-certificate true}) &
