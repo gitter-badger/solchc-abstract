@@ -6,7 +6,7 @@ Here we describe how we model Solidity programs as control-flow graphs. First we
 
 \subsection{Control-Flow Graph of a Solidity Function} \label{sec:sol_cfg_fun}
 
-To generate the control-flow graph of a Solidity function we initially create an entry node to represent its start. Beginning from the entry node, the code is scanned until the function ends or a return statement is reached. During the scanning process, statements that do not influence the control-flow, such as assignments, are stored in the current node for future analysis. When control structures are reached, however, the graph is updated according to their semantics. To model the end of the function, a sink, called the exit node, is created, being the targeted by every node with a return statements, and if none exist, by node storing the last statement of the function.
+To generate the control-flow graph of a Solidity function we initially create an entry node to represent its start. Beginning from the entry node, the code is scanned until the function ends or a return statement is reached. During the scanning process, statements that do not influence the control-flow, such as assignments, are stored in the current node for future analysis. When control structures are reached, however, the graph is updated according to their semantics. To model the end of the function, a sink, called the exit node, is created, being targeted by every node with a return statement, and if none exist, by the node storing the last statement of the function.
 
 The shape of the resulting graph depends of the control structures present in the function. The graphs generate by some common structures can be seen inside the dotted squares in figures \ref{fig:cfg_if}, \ref{fig:cfg_if-else}, and \ref{fig:cfg_while}; the edges with no tag have value \texttt{true}. Each condition generates an empty node with two outward edges, one with the condition itself, and one with its negation. Control structures can be combined to model complex scenarios, such as nested loops.
 
@@ -30,7 +30,7 @@ The encoding of the Solidity assertions is done according to their semantics. Th
   \begin{minipage}[h]{0.43\textwidth}
   	\centering
     \includegraphics[width=\textwidth]{images/while}
-    \caption{Graph of the while-loop}
+    \caption{Graph of the while loop}
     \label{fig:cfg_while}
   \end{minipage}
   \begin{minipage}[h]{0.43\textwidth}
@@ -43,7 +43,7 @@ The encoding of the Solidity assertions is done according to their semantics. Th
 
 Function calls, be them  recursive calls, calls to functions in the same contract or in another contract, are always considered to be inlined. The source code of all functions called is thus required for the generation of the control-flow graph.
 
-The control-flow graph of \texttt{average} function shown in Section \ref{sec:background_sol} can be seen in Figure \ref{fig:cfg_average}. In this example we can see that the variables \texttt{count} and \texttt{sum} are used but not defined, since they are state variables; the return variable is initialized with its default value. To correctly encode state variables, a model of the whole contract is required.
+The control-flow graph of the \texttt{average} function, shown in Section \ref{sec:background_sol}, can be seen in Figure \ref{fig:cfg_average}. In this example we can see that the variables \texttt{sum} and \texttt{count} are used but not defined, since they are state variables; the return variable is initialized with its default value. To correctly encode state variables, a model of the whole contract is required.
 
 \begin{figure}[ht]
 	\centering
@@ -56,7 +56,7 @@ The control-flow graph of \texttt{average} function shown in Section \ref{sec:ba
 
 \subsection{Control-Flow Graph of a Solidity Contract} \label{sec:sol_cfg_con}
 
-Solidity contracts do not have a main function, once deployed to the blockchain all their functions, with the appropriate visibility, can be called many times and in any order. To capture this behaviour in a single control-flow graph, we create an infrastructure to model calls to functions, as can be seen in Figure \ref{fig:cfg_contract-general}.
+Solidity contracts do not have a main function, once deployed to the blockchain all their functions, with the appropriate visibility, can be called many times and in any order. To capture this behaviour in a single control-flow graph, we create an infrastructure to model calls to functions, shown in Figure \ref{fig:cfg_contract-general}.
 
 \begin{figure}[ht]
 	\centering
