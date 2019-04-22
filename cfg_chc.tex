@@ -3,14 +3,14 @@
 From control-flow graphs we can generate Horn clauses that enable the use of powerful of-the-shelf smt solvers for verification. For each transition in the graph, we create a constrained Horn Clause with the following structure:
 
 \begin{align*}
-\text{Current\_Relation} \land \text{SSA} \land \text{Condition} \implies \text{Next\_Relation}
+\text{Current\_Relation} \land \text{Condition} \land \text{SSA} \implies \text{Next\_Relation}
 \end{align*}
 
-The Current\_Relation represents the source node of the transition, the SSA models the statements stored in the source node in Single Static Assignment format, the Condition is the predicate associated with the transition, and, finally, the Next\_Relation represents the target node of the transition. All the terms in the left-hand side are optional, with their absence being marked by \texttt{true}. A clause without its Current\_Relation models the constructor, while a missing SSA term indicates an empty node; conditions with value \texttt{true} are omitted for brevity.
+The Current\_Relation represents the source node of the transition, the Condition is the predicate associated with the transition, the SSA models the statements stored in the source node in Single Static Assignment format, and, finally, the Next\_Relation represents the target node of the transition. All the terms in the left-hand side are optional, with their absence being marked by \texttt{true}. A clause without its Current\_Relation models the constructor, while a missing SSA term indicates an empty node; conditions with value \texttt{true} are omitted for brevity.
 
 Our model allows only for constrained, also called linear, Horn clauses, with rules containing only a one to one link between relations. Non-linearity, with many to one links, can arise from recursive calls, but these are removed during the generation of the control-flow graph through inlining.
 
-We now present the result of translating the graph in Figure \ref{fig:cfg_contract-c} into Horn clauses. First, all the relations and variables need to be declared, as shown in Figure \ref{fig:chc_rel-and-var}. Each relation has a set of parameters, which are the variables used in their context; state variables are present in all relations, while local variables only the relations modelling their function. Two versions of the \texttt{sum} and \texttt{count} variables are defined, due to SSA.
+We now present the result of translating the graph in Figure \ref{fig:cfg_contract-c} into Horn clauses. First, all the relations and variables need to be declared, as shown in Figure \ref{fig:chc_rel-and-var}; FB and Avg stand for the fallback and average functions, respectively. Each relation has a set of parameters, which are the variables used in their context; state variables are present in all relations, while local variables only the relations modelling their function. Two versions of the \texttt{sum} and \texttt{count} variables are defined, due to SSA.
 
 \begin{figure}[ht]
 	\centering
@@ -28,7 +28,9 @@ We now present the result of translating the graph in Figure \ref{fig:cfg_contra
 	\label{fig:chc_rel-and-var}
 \end{figure}
 
+The second step is to define the rules that model each transition, as shown in Figure \ref{fig:chc_rules}; all the operators are used with prefix notation. The initial rule models the constructor, by setting the initial value of the state variables, and the next rule models its transition to the interface; the sink of the constructor is omitted for brevity. From the interface there are two rules, each targeting a different function in the contract, which are chosen nondeterministically. The rules derived from the functions themselves are straightforward.
 
+The values of the variables are carried through the application of each rule, with, for example, the values of sum\_0 and count\_0 in the second rule being both 0. The SSA is local to each rule, always starting from sum\_0 and count\_0, as can be seen in the difference between the Next\_Relation of the fifth rule and the Current\_Relation of the sixth rule.
 
 \begin{figure}[ht]
 	\centering
@@ -77,12 +79,26 @@ We now present the result of translating the graph in Figure \ref{fig:cfg_contra
 	\label{fig:chc_rules}
 \end{figure}
 
+With our encoding the verification of asserts is transformed into a reachability problem. If Error can be reached from the Constructor an assert is being violated. With this in mind, the last step is the addition of the following query:
 
+\begin{align*}
+(\text{query Error :print-certificate true})
+\end{align*}
 
-\begin{flalign*}
-& (\text{query Error :print-certificate true}) &
-\end{flalign*}
+This query checks if Error can be reached by applying the provided rules. If it can be reached, the SMT solver provides a \texttt{sat} result, otherwise it outputs \texttt{unsat}. In addition to the query, we also require the certificate to be provided by the SMT solver. This is an automatically generated invariant about the contract. The assert of our running example is not violated, the generated invariant is shown below:
 
+\begin{align*}
+& (\forall \text{ ((A Int) } \text{(B Int))} \\
+& \hspace{0.5cm} \text{(let } \text{((a!1 (not (} \leq \text{(/ A B) 0))))} \\
+& \hspace{1cm} \text{(= (Interface A B) (and (} \geq \text{A 0) (or a!1 (} \leq \text{B 0))}\text{))))}
+\end{align*}
+
+This is an invariant of the interface, which means that it holds for the contract as a whole. It can be breached during the execution of a function, but it holds after it ends. This particular invariant ensures that between function calls \texttt{sum} is never negative and that either the average (i.e. \texttt{sum} / \texttt{count}) is positive or \texttt{count} is not positive.
+
+The generation of invariants at the contract level, instead of at the function level, is a challenge, since they emerge from the interaction of many functions with the state variables. Our approach allows for the automatic generation of contract invariants through the use of off-the-shelf SMT solvers.
+
+% From chc.txt
+%
 %\begin{flalign*}
 %& (\text{set-logic HORN}) &
 %\end{flalign*}
@@ -147,6 +163,12 @@ We now present the result of translating the graph in Figure \ref{fig:cfg_contra
 %& (\text{Avg0 sum count})))
 %\end{flalign*}
 %
-%\begin{flalign*}
-%& (\text{query AvgError :print-certificate true}) &
-%\end{flalign*}
+%\begin{align*}
+%(\text{query Error :print-certificate true})
+%\end{align*}
+%
+%\begin{align*}
+%& (\text{forall} \text{ ((A Int) } \text{(B Int))} \\
+%& \hspace{0.5cm} \text{(let } \text{((a!1 (not (} \leq \text{(/ (to\_real A) (to\_real B)) 0))))} \\
+%& \hspace{1cm} \text{(= (Interface A B) (and (or a!1 (} \leq \text{B 0)) (} \geq \text{A 0)))))}
+%\end{align*}
