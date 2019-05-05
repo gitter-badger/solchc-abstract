@@ -1,0 +1,162 @@
+\newpage
+\section{Model}
+
+Given a contract with storage variables $\svar$,
+the control flow graph of a function $f(\farg)$ 
+is the tuple \mbox{$\langle G,\alpha,\omega,\epsilon,\rho\rangle$}.
+\mbox{$G=(V,E,\lambda,\mu)$} 
+is a node- and edge-labeled directed graph,
+where $V$ is the set of CFG blocks, $E$ is the set of transitions 
+$\langle V,V\rangle$,
+\mbox{$\lambda:V\rightarrow\varphi(\lvar,
+\lvar')$}, and \mbox{$\mu:E\rightarrow\varphi(\lvar)$},
+where $\lvar$ is the set of local 
+variables of $f$, and \mbox{$\lvar'=\{x'\mid x\in\lvar\}$}. 
+The CFG blocks $\alpha,\omega\in V$ are respectively the entry 
+block and exit block. The CFG block $\epsilon\in V$ is the block
+representing an assertion error.
+The function \mbox{$\rho:\svar\cup\farg\rightarrow\lvar$} is 
+a injection mapping every storage variable and function 
+argument to a distinct local variable. 
+
+During the execution of $f$ only local variables are manipulated. If
+the execution concludes without errors, the storage variables
+are updated with the respective local variables values
+provided by $\rho$.
+%
+The function $\lambda$ maps each CFG block to 
+the SSA formula modelling such block behaviour, setting for each 
+$x\in\lvar$, the value $x'$ resulting from the block
+execution.
+The function $\mu$ maps each transition to the condition 
+under which such transition is taken.
+For each \mbox{$\mathsf{assert}(\sigma(\lvar))$} in the 
+source code of a block $v\in V$, an edge 
+\mbox{$e=\langle v,\epsilon\rangle$}, with \mbox{$\mu(e)=\sigma$}
+is added to $E$.
+
+\subsection{CHCs of a function}
+Given the control flow graph 
+\mbox{$\langle G,\alpha,\omega,\epsilon,\mu\rangle$} 
+of a function $f(\farg)$, the set of CHC $\Pi_f$ modelling $f$ 
+is constructed
+as follows. 
+%
+For each CFG block $v\in V$, $\pred_v(\lvar)$ 
+is a predicate symbol representing the block.
+
+Let $\inP_f(\svar,\farg)$ the predicate symbol
+representing a call to $f(\farg)$ given a contract state $\svar$.
+The following CHC is the {\em initial rule} of $f$.
+\begin{align}
+\label{eq:CHC-initial}
+\forall\svar,\farg\cdot\inP_f(\svar,\farg)\bigwedge_{x\in\svar\cup\farg}x=\rho(x)\implies\pred_\alpha(\lvar)
+\end{align}
+
+Let $\finP_f(\svar)$ the predicate symbol
+representing the end of a call to $f$, and the consequent
+update of storage variables. The following CHC is the 
+{\em final rule} of $f$.
+\begin{align}
+\label{eq:CHC-final}
+\forall\lvar\cdot\pred_\omega(\lvar)\bigwedge_{x\in\svar}x=\rho(x)\implies\finP_f(\svar)
+\end{align}
+
+Finally, the set of rules representing the execution of $f$ is defined as following.
+For each transition $e=\langle v,w\rangle\in E$,
+\begin{align}
+\label{eq:CHC-transition}
+\forall\lvar\cdot\pred_v(\lvar)\wedge\lambda(v)(\lvar,\lvar')\wedge\mu(e)(\lvar)\implies\pred_w(\lvar')	
+\end{align}
+
+The set of CHC $\Pi_f$ modelling $f$ is defined as the set
+consisting of the initial rule from \cref{eq:CHC-initial},
+the final rule from \cref{eq:CHC-final}, and all the 
+rules in the set from \cref{eq:CHC-transition}.
+
+\subsection{CHCs of a contract}
+This section presents how to construct the set of CHC 
+modelling any possible behaviour of a contract.
+Let $\conP(\svar)$ the predicate representing the contract state.
+Initially, the contract state is set accordingly to the contract
+constructor. 
+The initial call to the constructor, and the consequent 
+contract state update are provided by the following rules.
+\begin{align}
+\label{eq:CHC-constructor-initial}
+\forall\svar,\farg\cdot\top&\implies\inP_\mathsf{constructor}(\svar,\farg)\\
+\label{eq:CHC-constructor-final}
+\forall\svar\cdot\finP_\mathsf{constructor}(\svar)&\implies\conP(\svar)
+\end{align}
+
+Every transaction in the blockchain
+involving the contract is in fact a call
+to a specific function. The order of such calls is
+nondeterministic. Therefore, for each function $f$ in the contract, 
+the following rule represents a call to $f$.
+\begin{align}
+\label{eq:CHC-call-initial}
+\forall\svar,\farg\cdot\conP(\svar)\implies\inP_f(\svar,\farg)
+\end{align}
+
+Every transaction which function execution
+leads no errors results in the contract state being updated
+accordingly to the function. 
+For each function $f$ in the contract, 
+the following rule represents a storage state update
+according to $f$.
+\begin{align}
+\label{eq:CHC-call-final}
+\forall\svar\cdot\finP_f(\svar)\implies\conP(\svar)
+\end{align}
+
+The set of CHC $\Pi_C$ modelling any possible behaviour of
+a contract $C$ is defined as the constructor rules from
+\cref{eq:CHC-constructor-initial,eq:CHC-constructor-final},
+the transaction rules from 
+\cref{eq:CHC-call-initial,eq:CHC-call-final}, 
+the rules $\Pi_\mathsf{constructor}$, and
+the rules $\Pi_f$ for each function $f$ in the contract.
+
+\subsection{Contract invariants}
+\begin{definition}[Contract Invariant]
+\label{def:contract-invariant}
+	Given a contract $C$, a contract invariant is a formula
+	$\varphi(\svar)$ such that \mbox{$\Pi_C\wedge\forall\svar\cdot\conP(\svar)\implies\varphi(\svar)$} is satisfiable.
+\end{definition}
+%
+A contract invariant is a formula over state variables
+that is true in any possible state the contract can reach
+by submitting any possible transaction.
+
+\subsection{Assertion Error Reachability}
+
+\begin{definition}[Safety Query]
+	The safety query of a function control flow graph
+	is the CHC
+	\mbox{$\forall\lvar\cdot\pred_\epsilon\implies\bot$}.
+	The safety query of a contract $C$ is the set $\query_C$ of 
+	the safety queries of every function of $C$.
+\end{definition}
+
+
+
+\begin{definition}[Contract Safety]
+	A contract $C$ is safe if and only if
+	\mbox{$\Pi_C\wedge\query_C$} is satisfiable.
+\end{definition}
+
+The execution of IC3 against \mbox{$\Pi_C\wedge\query_C$}
+terminates with either a counterexample consisting of a
+finite set of transactions leading to an assertion error,
+or a safe inductive invariant proving no assertion error
+is reachable. Any formula $\varphi(\svar)$ implied by a
+safe inductive invariant is by \cref{def:contract-invariant}
+a contract invariant.
+
+
+
+
+
+
+
