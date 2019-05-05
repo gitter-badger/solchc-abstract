@@ -1,13 +1,47 @@
-\documentclass{easychair}
-\usepackage[utf8]{inputenc}
+\documentclass[10pt,letterpaper]{IEEEtran}
 \usepackage{listings}
+\usepackage[cmex10]{amsmath}
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{bussproofs}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{centernot}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{makecell}
+\usepackage{synttree}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{epsfig}
+\usepackage[linesnumbered]{algorithm2e}
+\usepackage{setspace}
 
 \title{Learning Contract Invariants using IC3}
-\author{Matteo Marescotti\inst{1}\and Leonardo Alt\inst{2}\and Rodrigo Otoni\inst{1}}
-\institute{USI\and Ethereum Foundation}
 
-\titlerunning{Learning Contract Invariants using IC3}
-\authorrunning{M. Marescotti, L. Alt, and R. Otoni}
+%\author{Matteo Marescotti\inst{1}\and Leonardo Alt\inst{2}\and Rodrigo Otoni\inst{1}}
+%\institute{USI\and Ethereum Foundation}
+%
+%\titlerunning{Learning Contract Invariants using IC3}
+%\authorrunning{M. Marescotti, L. Alt, and R. Otoni}
+
+\author{
+    \IEEEauthorblockN{Matteo Marescotti\IEEEauthorrefmark{1},
+    Leonardo Alt\IEEEauthorrefmark{2},
+    Rodrigo Otoni\IEEEauthorrefmark{1}
+    Antti E. J. Hyv{\"a}rinen\IEEEauthorrefmark{1}, 
+    Natasha Sharygina\IEEEauthorrefmark{1}}\\
+    \IEEEauthorblockA{\IEEEauthorrefmark{1}Universit{\`a} della Svizzera italiana, Switzerland}\\
+    \IEEEauthorblockA{\IEEEauthorrefmark{2}Ethereum Foundation}
+}
+
 
 \lstset{
   numbers=left,
