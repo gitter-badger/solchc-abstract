@@ -1,11 +1,20 @@
 \begin{abstract}
-	The Ethereum platform is a public, distributed, blockchain-based database where users submit transactions by invoking contract functions.
+The Ethereum platform is a public, distributed, programmable blockchain-based
+database where users can submit transactions by invoking smart contract
+functions.
 %
-Verifying contracts code is extremely important considering bugs might cause money losses to interested parties, and  the sources become immutable after deployment.
+Verifying smart contracts is extremely important considering bugs might cause
+money lossies to interested parties, and that these contracts are immutable
+after deployment.
 %
-Unfortunately, proving safety for assertions in a function often entails considering contract invariants, i.e. facts only emerging from the overall behaviour of many contract functions.
+Unfortunately, proving safety for assertions in a function often entails
+considering contract invariants, i.e. facts only emerging from the overall
+behaviour of many contract functions.
 %
-Manually providing contract invariants is an error prone approach because automatic verification would assume them regardless their validity.
+Manually providing contract invariants is an error prone approach because
+automatic verification would assume them regardless their validity.
 %
-In this work we present a technique for modelling a contract based on Constrained Horn Clauses, using IC3 to automatically learn contract invariants necessary to prove assertions safety.
+In this work we present a technique for modelling Solidity smart contract as
+Constrained Horn Clauses, using IC3 to automatically learn contract
+invariants necessary to prove assertions safety.
 \end{abstract}
