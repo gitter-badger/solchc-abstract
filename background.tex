@@ -1,28 +1,67 @@
 \section{Background}
 
-Here we present the background material of our work: the Solidity language, in Section \ref{sec:background_sol}, control-flow graphs, in Section \ref{sec:background_cfg}, and constrained Horn clauses, in Section \ref{sec:background_chc}.
+Here we present the background material: the Solidity smart contract language,
+control-flow graphs, and Constrained Horn clauses.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Solidity} \label{sec:background_sol}
 
-Solidity is a Turing-Complete language for the development of smart contracts. The two main elements of Solidity are contracts and functions, which we now describe; detailed information on Solidity can be found in \cite{}. 
+Solidity is a Turing-Complete language for the development of smart contracts.
+The two main elements of Solidity are contracts and functions, which we now
+describe; detailed information on Solidity can be found in the official
+Solidity documentation \cite{SolidityDocs}.
 
-\paragraph{Contracts.} A Solidity contract is a structure similar to a class in object-oriented languages, and can contain both data and functions. Data can range from integer and boolean values to arrays and structs. Functions contain the instructions for computation. A contract does not have a main function, instead all functions with appropriate visibility can be called once the contract is deployed on the blockchain.
+\paragraph{Contracts.} A Solidity contract is a structure similar to a class in
+object-oriented languages, and can contain both data and functions.
+%
+Data can range from integer and Boolean values to arrays and structs.
+%
+Functions contain the instructions for computation.
+%
+A contract does not have a main function, instead all functions with
+appropriate visibility can be called once the contract is deployed on the
+blockchain.
 
-\paragraph{Functions.} A function in a contract contains a sequence of statements for computation. Most operators that are common in programming languages, such as conditionals and loops, are supported. Function qualifiers include visibility and access to state variables. 
+\paragraph{Functions.} A function in a contract contains a sequence of
+statements for computation.
+%
+Most operators that are common in programming languages, such as conditionals
+and loops, are supported.
+%
+Function qualifiers include visibility and access to state variables. 
 
-\paragraph{} As a running example, consider contract \texttt{C} shown in Figure \ref{fig:contractC}. This contract has two state variables of type unsigned int, \texttt{sum} and \texttt{count}, and two functions. The first function is a fallback function, it has no name and is executed when the contract is called without specifying one of its named functions; \texttt{external} specify that the function can only be called from outside the contract, while \texttt{payable} allows the function to receive ether. The \texttt{average} function follows the standard format, returning an unsigned integer at the end of its execution; \texttt{public} specify that the function can be called both from inside and outside the contract, and \texttt{view} ensures that the state variables are not modified.
+As a running example, consider contract \texttt{C} shown in Figure
+\ref{fig:contractC}. This contract has two state variables of type unsigned
+int, \texttt{sum} and \texttt{count}, and two functions. The first function is
+a fallback function, it has no name and is executed when the contract is called
+without specifying one of its named functions; \texttt{external} specifies that
+the function can only be called via a transaction, while \texttt{payable}
+allows the function to receive ether. The \texttt{average} function follows the
+standard format, returning an unsigned integer at the end of its execution;
+\texttt{public} specifies that the function can be called both internally and
+externally, and \texttt{view} ensures that the state variables are not
+modified.
 
 \begin{figure}
 \lstinputlisting{contract.txt}
-\caption{An example of a contract written in Solidity}
+\caption{Example of a smart contract written in Solidity.}
 \label{fig:contractC}
 \end{figure}
 
-The fallback function accepts a certain value in ether, \texttt{msg.value}, adds this value to \texttt{sum}, and increase the counter. Two \texttt{require} assertions are present, the first one checks if the sent value is positive, an the second one ensures that overflow will not occur. This type of assertion works as a pre-condition, usually used to check inputs.
+The fallback function in this contract accepts a certain value in ether,
+\texttt{msg.value}, adds this value to \texttt{sum}, and increases the counter.
+Two \texttt{require} statements are present. The first one guarantees that the
+sent value is non zero, and the second one filters out overflow cases. This
+type of statement works as pre-conditions in Solidity, usually employed to
+filter valid inputs.
 
-The \texttt{average} function calculates and returns the average of deposits of ether. Two assertions are present, the first one checks if there is at least one deposit, and the second one ensure that the average positive. The \texttt{assert} works as a post-condition, meaning that its predicate should never be false in a valid execution, with a violation capturing an error in the code.
+The \texttt{average} function calculates and returns the average of deposits of
+ether. The \texttt{require} statement checks that there is at least one
+deposit, and the \texttt{assert} states that the average is non zero. The
+\texttt{assert} works as a post-condition, meaning that its predicate should
+never be false in a valid execution, with a violation capturing an error in the
+code or in the execution environment.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
