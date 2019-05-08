@@ -17,6 +17,8 @@ To model the contract graph, three new empty blocks are created: global entry, i
 	\label{fig:cfg_contract-c}
 \end{figure}
 
+From the control flow graph of the contract, the constrained  Horn clauses can be directly extracted. The transition from the entry block to the constructor, and from the constructor to the interface block, are modelled as Eq. \ref{eq:CHC-constructor-initial} and Eq. \ref{eq:CHC-constructor-final}. The interaction between the interface and the functions is modelled as Eq. \ref{eq:CHC-call-initial} and Eq. \ref{eq:CHC-call-final}. For the functions themselves, entry and exit blocks are modelled as Eq. \ref{eq:CHC-initial} and Eq. \ref{eq:CHC-final}, and their bodies are modelled according to Eq. \ref{eq:CHC-transition}; the prototype does not implement $\rho$, using the state variables directly instead of creating temporary local variables to represent them, this change avoids the overhead of having local copies and does not affect the soundness of the implementation.
+
 The prototype currently implements the generation of Horn clauses for a subset of the Solidity language. Most basic arithmetic and control flow operators, as well as assertions, are supported. Regarding data, the prototype fully supports integer variables and has partial support for arrays. Function calls, recursive or otherwise, additional value and reference types, such as strings and structs, are not yet supported; the limitations are specific to the prototype, and are not present in the formal modelling.
 
 % Early versions
