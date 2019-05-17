@@ -1,23 +1,29 @@
-\newpage
 \section{Model}
 
-Given a contract with state variables $\svar$,
-the control flow graph of a function $f(\farg)$ 
+Given a contract $C=\langle\svar,\functions\rangle$,
+$\svar$ are the state variables and $\functions$ is
+the set of all functions in the contract.
+The control flow graph of a function 
+\mbox{$f(\farg)\rightarrow\rvar\in\functions$},
+where $\farg$ and $\rvar$ are respectively arguments and
+return variables,
 is the tuple \mbox{$\langle G,\alpha,\omega,\epsilon,\rho\rangle$}.
 \mbox{$G=(V,E,\lambda,\mu)$} 
 is a node- and edge-labeled directed graph,
-where $V$ is the set of CFG blocks, $E$ is the set of transitions 
-$\langle V,V\rangle$,
-\mbox{$\lambda:V\rightarrow\varphi(\lvar,
-\lvar')$}, and \mbox{$\mu:E\rightarrow\varphi(\lvar)$},
-where $\lvar$ is the set of local 
-variables in $f$, and \mbox{$\lvar'=\{x'\mid x\in\lvar\}$}. 
+where $V$ is the set of CFG blocks, 
+\mbox{$E\subseteq V\times V$} is the set of transitions,
+for all $v\in V$, $\lambda_v(\lvar,
+\lvar')$ is a formula labelling $v$,
+for all $e\in E$, $\mu_e(\lvar)$ is a formula labelling $e$,
+where
+\mbox{$\lvar$} is the set of local 
+variables of $f$, and \mbox{$\lvar'=\{x'\mid x\in\lvar\}$}. 
 The CFG blocks $\alpha,\omega\in V$ are respectively the entry 
 block and exit block. The CFG block $\epsilon\in V$ is the block
 representing an assertion error.
-Function \mbox{$\rho:\svar\cup\farg\rightarrow\lvar$} is 
-an injection mapping every state variable and function 
-argument to a distinct local variable. 
+Function \mbox{$\rho:\svar\cup\farg\cup\rvar\rightarrow\lvar$} is 
+an injection mapping every state variable, function 
+argument and return variable to a distinct local variable. 
 
 During the execution of $f$ only local variables are manipulated. If
 the execution concludes without errors, the state variables
@@ -27,46 +33,52 @@ provided by $\rho$.
 Function $\lambda$ maps each CFG block to 
 the SSA formula modelling such block behaviour, setting for each 
 $x\in\lvar$, the value $x'$ resulting from the block
-execution.
+execution. 
+%Local variables directly mapping to state variables
+%and function arguments are not updated by the execution of
+%any block. Thus, for every CFG block $v$,
+%\mbox{$\lambda(v)\implies\rho(x)=\rho(x)'$}, 
+%for all $x$ in \mbox{$\svar\cup\farg$}.
 Function $\mu$ maps each transition to the condition 
 under which such transition is taken.
 For each \mbox{$\mathsf{assert}(\sigma(\lvar))$} in the 
 source code of a block $v\in V$, an edge 
-\mbox{$e=\langle v,\epsilon\rangle$}, with \mbox{$\mu(e)=\sigma$}
+\mbox{$e=\langle v,\epsilon\rangle$}, with \mbox{$\mu_e=\neg\sigma$}
 is added to $E$.
 
 \subsection{Solidity function as CHCs}
 Given the control flow graph 
-\mbox{$\langle G,\alpha,\omega,\epsilon,\mu\rangle$} 
-of a function $f(\farg)$, the set of CHC $\Pi_f$ modelling $f$ 
+\mbox{$\langle G,\alpha,\omega,\epsilon,\rho\rangle$} 
+of a function $f(\farg)\rightarrow\rvar$, the set of CHC $\Pi_f$ modelling $f$ 
 is constructed
 as follows. 
 %
-For each CFG block $v\in V$, $\pred_v(\lvar)$ 
-is a predicate symbol representing the block.
+For each CFG block $v\in V$, $\pred_f^v(\lvar)$ 
+is a predicate symbol representing the block; we
+omit $f$ when it is clear from the context.
 
 Let $\inP_f(\svar,\farg)$ be the predicate symbol
 representing a call to $f(\farg)$ given a contract state $\svar$.
 The following CHC is the {\em initial rule} of $f$.
 \begin{align}
 \label{eq:CHC-initial}
-\forall\svar,\farg\cdot\inP_f(\svar,\farg)\bigwedge_{x\in\svar\cup\farg}x=\rho(x)\implies\pred_\alpha(\lvar)
+\forall\svar,\farg,\lvar\cdot\inP_f(\svar,\farg)\bigwedge_{x\in\svar\cup\farg}x=\rho(x)\implies\pred^\alpha(\lvar)
 \end{align}
 
-Let $\finP_f(\svar)$ be the predicate symbol
+Let $\finP_f(\svar,\rvar)$ be the predicate symbol
 representing the end of a call to $f$, and the consequent
 update of state variables. The following CHC is the 
 {\em final rule} of $f$.
 \begin{align}
 \label{eq:CHC-final}
-\forall\lvar\cdot\pred_\omega(\lvar)\bigwedge_{x\in\svar}x=\rho(x)\implies\finP_f(\svar)
+\forall\svar,\rvar,\lvar\cdot\pred^\omega(\lvar)\bigwedge_{x\in\svar\cup\rvar}x=\rho(x)\implies\finP_f(\svar,\rvar)
 \end{align}
 
 Finally, the set of rules representing the execution of $f$ is defined as follows.
 For each transition $e=\langle v,w\rangle\in E$,
 \begin{align}
 \label{eq:CHC-transition}
-\forall\lvar\cdot\pred_v(\lvar)\wedge\lambda(v)(\lvar,\lvar')\wedge\mu(e)(\lvar)\implies\pred_w(\lvar')	
+\forall\lvar\cdot\pred^v(\lvar)\wedge\lambda_v(\lvar,\lvar')\wedge\mu_e(\lvar)\implies\pred^w(\lvar')	
 \end{align}
 
 The set of CHC $\Pi_f$ modelling $f$ is defined as the set
@@ -84,14 +96,16 @@ The initial call to the constructor, and the consequent
 contract state update are provided by the following rules.
 \begin{align}
 \label{eq:CHC-constructor-initial}
-\forall\svar,\farg\cdot\top&\implies\inP_\mathsf{constructor}(\svar,\farg)\\
+\forall\svar,\farg\cdot\top&\implies\inP_\constructor(\svar,\farg)\\
 \label{eq:CHC-constructor-final}
-\forall\svar\cdot\finP_\mathsf{constructor}(\svar)&\implies\conP(\svar)
+\forall\svar\cdot\finP_\constructor(\svar)&\implies\conP(\svar)
 \end{align}
 
 Every transaction in the blockchain
 involving the contract is in fact a call
-to a specific function. The order of such calls is
+to a specific function 
+\mbox{$f\in\functions\setminus\{\constructor\}$}. 
+The order of such calls is
 nondeterministic. Therefore, for each function $f$ in the contract, 
 the following rule represents a call to $f$.
 \begin{align}
@@ -106,7 +120,7 @@ the following rule represents a state update
 according to $f$.
 \begin{align}
 \label{eq:CHC-call-final}
-\forall\svar\cdot\finP_f(\svar)\implies\conP(\svar)
+\forall\svar,\rvar\cdot\finP_f(\svar,\rvar)\implies\conP(\svar)
 \end{align}
 
 The set of CHC $\Pi_C$ modelling any possible behaviour of
@@ -121,7 +135,7 @@ the rules $\Pi_f$ for each function $f$ in the contract.
 \begin{definition}[Contract Invariant]
 \label{def:contract-invariant}
 	Given a contract $C$, a contract invariant is a formula
-	$\varphi(\svar)$ such that \mbox{$\Pi_C\wedge\forall\svar\cdot\conP(\svar)\implies\varphi(\svar)$} is satisfiable.
+	$\varphi(\svar)$ such that the set of CHC \mbox{$\Pi_C\cup\forall\svar\cdot\conP(\svar)\implies\varphi(\svar)$} is satisfiable.
 \end{definition}
 %
 A contract invariant is a formula over state variables
@@ -133,7 +147,7 @@ by submitting any possible transaction.
 \begin{definition}[Safety Query]
 	The safety query of a function control flow graph
 	is the CHC
-	\mbox{$\forall\lvar\cdot\pred_\epsilon\implies\bot$}.
+	\mbox{$\forall\lvar\cdot\pred^\epsilon\implies\bot$}.
 	The safety query of a contract $C$ is the set $\query_C$ of 
 	the safety queries of every function of $C$.
 \end{definition}
@@ -141,14 +155,95 @@ by submitting any possible transaction.
 
 
 \begin{definition}[Contract Safety]
-	A contract $C$ is safe if and only if
-	\mbox{$\Pi_C\wedge\query_C$} is satisfiable.
+	A contract $C$ is safe if and only if the set
+	\mbox{$\Pi_C\cup\query_C$} is satisfiable.
 \end{definition}
 
-The execution of IC3 against \mbox{$\Pi_C\wedge\query_C$}
+The execution of a solver
 terminates with either a counterexample consisting of a
 finite set of transactions leading to an assertion error,
 or a safe inductive invariant proving no assertion error
 is reachable. Any formula $\varphi(\svar)$ implied by a
 safe inductive invariant is by \cref{def:contract-invariant}
 a contract invariant.
+
+\subsection{Recursion}
+In case function calls are not inlined, 
+the set $\Pi_C$ would contain non-linear CHC.
+Non-linear CHC are necessary to model programs with
+non-inlined function calls, e.g. in case of recursion.
+
+A call in $f$ to a function $g$ is the transition
+from a CFG block $p$ that executes $g$, to the
+following block $q$. 
+The effect of executing the block $p$ is the update of the local 
+variables of $f$ accordingly to the changes
+made by the execution of $g$. In particular,
+the update refers to
+1) zero or more returned variables,
+and 2) any updated state variables.
+In order to trace such updates, a predicate for $g$ that maps
+previous and following states of $g$ execution is needed.
+The previous state consists of the state variables
+before the function call and
+function arguments, while the following state consists
+of the returned variables and the state variables after
+the function call.
+%
+The predicates from 
+\cref{eq:CHC-initial,eq:CHC-final,eq:CHC-transition}
+are not suitable for this purpose because they don't store 
+the previous state. In fact, the predicates $\pred(\lvar)$
+only refer to variable values at a particular execution
+time. 
+
+The solution is to use the predicate 
+$\pred^v(X_0,\lvar)$ for each CFG block $v$ in the
+control flow graph of any function that is called and not inlined,
+where \mbox{$X_0=\{x_0\mid x\in\svar\cup\farg\}$}.
+Given a function $g$ having non-inlined calls,
+\Cref{eq:CHC-initial,eq:CHC-final,eq:CHC-transition} are then
+changed to:
+
+\begin{align}
+\label{eq:CHC-nl-initial}
+%\forall X_0,\svar,\farg,\lvar\cdot
+\inP_g(\svar,\farg)\bigwedge_{x\in\svar\cup\farg}\big(x_0=x\wedge x=\rho(x)\big)\implies\pred^\alpha(X_0,\lvar)\\
+\label{eq:CHC-nl-final}
+%\forall X_0,\svar,\rvar,\lvar\cdot
+\pred^\omega(X_0,\lvar)\bigwedge_{x\in\svar\cup\rvar}x=\rho(x)\implies\finP_g(X_0,\svar,\rvar)\\
+\label{eq:CHC-nl-transition}
+%\forall X_0,\lvar\cdot
+\pred^v(X_0,\lvar)\wedge\lambda_v(\lvar,\lvar')\wedge\mu_e(\lvar)\implies\pred^w(X_0,\lvar')	
+\end{align}
+
+
+Given a function $f$, the transition $e=\langle p,q\rangle$
+from the CFG block $p$ that calls a function $g$ without
+inlining, to the 
+next block $q$, \mbox{$\mu_e=\top$}, and 
+\mbox{$\lambda_p(\lvar,\lvar')$} is defined as
+\begin{align}
+\label{eq:CHC-nl-tr_call}
+\finP_g(X_0,\svar,\rvar)\bigwedge_{x\in\svar\cup\rvar}\big(x_0=\rho(x)\wedge x=\rho(x)'\big)
+\end{align}
+%
+Therefore, by applying \cref{eq:CHC-transition}
+to the transition $e$,
+the resulting CHC would be non-linear because
+$\lambda_p$ contains a predicate.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

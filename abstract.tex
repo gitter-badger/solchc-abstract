@@ -4,17 +4,30 @@ database where users can submit transactions by invoking smart contract
 functions.
 %
 Verifying smart contracts is extremely important considering bugs might cause
-money lossies to interested parties, and that these contracts are immutable
+money losses to interested parties, and that these contracts are immutable
 after deployment.
 %
 Unfortunately, proving safety for assertions in a function often entails
 considering contract invariants, i.e. facts only emerging from the overall
 behaviour of many contract functions.
 %
-Manually providing contract invariants is an error prone approach because
-automatic verification would assume them regardless their validity.
 %
 In this work we present a technique for modelling Solidity smart contract as
 Constrained Horn Clauses, using IC3 to automatically learn contract
 invariants necessary to prove assertions safety.
 \end{abstract}
+
+
+
+
+Recent approaches for verifying smart contracts 
+use existing symbolic verification techniques
+specific for other domains like e.g. C, Java etc.
+Although reusing and adapting existing techniques is 
+appealing, several domain specific features can make
+domain translation challenging or unsound.
+We propose a direct encoding for smart contracts 
+using constrained horn clauses,
+that allows the synthesis of 
+contract invariants i.e. facts only emerging from the overall
+behaviour of many contract functions.
